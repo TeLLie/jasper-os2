@@ -78,6 +78,7 @@
 
 #include <jasper/jas_types.h>
 
+#include <idn-int.h> //OS2
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
@@ -212,6 +213,10 @@ inline static int_fast32_t jas_fast32_asl(int_fast32_t x, unsigned n)
 /******************************************************************************\
 * Safe integer arithmetic (i.e., with overflow checking).
 \******************************************************************************/
+
+#ifndef SIZE_MAX
+# define SIZE_MAX ((size_t) -1)
+#endif
 
 /* Compute the product of two size_t integers with overflow checking. */
 inline static bool jas_safe_size_mul(size_t x, size_t y, size_t *result)
