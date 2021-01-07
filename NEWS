@@ -1,3 +1,28 @@
+2.0.24 (2021-01-03)
+===================
+
+* Add JAS_VERSION_MAJOR, JAS_VERSION_MINOR, JAS_VERSION_PATCH
+  for easier access to the JasPer version.
+* Fixes stack overflow bug on Windows, where variable-length
+  arrays are not available. (#256)
+
+2.0.23 (2020-12-08)
+===================
+
+* Fix CVE-2020-27828, heap-overflow in cp_create() in jpc_enc.c
+  https://github.com/jasper-software/jasper/issues/252
+
+2.0.22 (2020-10-05)
+===================
+
+* Update manual
+
+* Remove JPEG dummy codec. Jasper needs libjpeg for JPEG support
+
+* Fix test suite build failure regarding disabled MIF codec (#249)
+
+* Fix OpenGL/glut detection (#247)
+
 2.0.21 (2020-09-20)
 ===================
 
