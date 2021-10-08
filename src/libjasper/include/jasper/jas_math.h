@@ -78,6 +78,7 @@
 
 #include <jasper/jas_types.h>
 
+#include <idn-int.h> //OS2
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
