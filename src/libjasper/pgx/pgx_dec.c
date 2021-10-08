@@ -180,6 +180,10 @@ jas_image_t *pgx_decode(jas_stream_t *in, const char *optstr)
 		jas_eprintf("image too large\n");
 		goto error;
 	}
+	if (!num_samples) {
+		jas_eprintf("image has no samples\n");
+		goto error;
+	}
 	if (opts.max_samples > 0 && num_samples > opts.max_samples) {
 		jas_eprintf(
 		  "maximum number of samples would be exceeded (%zu > %zu)\n",
@@ -356,9 +360,9 @@ static int_fast32_t pgx_getword(jas_stream_t *in, bool bigendian, int prec)
 			goto error;
 		}
 		j = bigendian ? (wordsize - 1 - i) : i;
-		val = val | ((c & 0xff) << (8 * j));
+		val = val | ((c & 0xffU) << (8 * j));
 	}
-	val &= (1 << prec) - 1;
+	val &= (JAS_CAST(uint_fast32_t, 1) << prec) - 1;
 	return val;
 
 error:

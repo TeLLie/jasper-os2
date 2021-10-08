@@ -74,7 +74,6 @@
 * Includes.
 \******************************************************************************/
 
-#include "jasper/jas_image.h"
 #include "jasper/jas_stream.h"
 
 #include <assert.h>

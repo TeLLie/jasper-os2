@@ -170,14 +170,6 @@ target_include_directories(libjasper BEFORE PRIVATE
 set_target_properties(libjasper PROPERTIES OUTPUT_NAME jasper)
 set_target_properties(libjasper PROPERTIES LINKER_LANGUAGE C)
 
-if(OS2)
-set_target_properties(libjasper PROPERTIES
- OS2_DEF_VENDOR "Elbert Pol"
- OS2_DEF_PATCH "${LIBJASPER_VERSION_PATCH}"
- OS2_DEF_VERSION "${LIBJASPER_VERSION}"
- OS2_DEF_EXEType "WINDOWAPI")
-endif()
-
 if (MSVC)
 	target_compile_definitions(libjasper PRIVATE "-D_CRT_SECURE_NO_WARNINGS")
 	target_compile_definitions(libjasper PRIVATE "-D_CRT_SECURE_NO_DEPRECATE")

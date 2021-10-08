@@ -1,8 +1,53 @@
+2.0.33 (2021-08-01)
+===================
+
+* Fix a JP2/JPC decoder bug.
+* Fix a build issue impacting some platforms.
+
+2.0.32 (2021-04-18)
+===================
+
+* Test release performed with GitHub Actions.
+
+2.0.29 (2021-04-16)
+===================
+
+* Loosen some overly tight restrictions on JP2 codestreams, which caused
+  some valid codestreams to be rejected. (#289)
+
+2.0.28 (2021-03-29)
+===================
+
+* Fix potential null pointer dereference in the JP2/JPC decoder. (#269)
+* Fix ignoring of JAS_STREAM_FILEOBJ_NOCLOSE at stream close time. (#286)
+* Fix integral type sizing problem in JP2 codec. (#284)
+
+2.0.27 (2021-03-18)
+===================
+
+* Check for an image containing no samples in the PGX
+  decoder. (#271, #272, #273, #274, #275, #276, #281)
+* Check for dimensions of zero in the JPC and JPEG decoders.
+* Fix an arguably incorrect type for an integer literal
+  in the PGX decoder. (#270)
+* Check for an invalid component reference in the
+  JP2 decoder. (#269)
+* Check on integer size in JP2 decoder. (#278)
+
+2.0.26 (2021-03-05)
+===================
+
+* Fix JP2 decoder bug that can cause a null pointer dereference for
+  some invalid CDEF boxes. (#268) (CVE-2021-3467)
+
 2.0.25 (2021-02-07)
 ===================
 
 * Fix memory-related bugs in the JPEG-2000 codec resulting from
   attempting to decode invalid code streams. (#264, #265)
+  This fix is associated with CVE-2021-26926 and CVE-2021-26927.
+* Fix wrong return value under some compilers (#260)
+* Fix CVE-2021-3272 heap buffer overflow in jp2_decode (#259) 
 
 2.0.24 (2021-01-03)
 ===================
@@ -133,3 +178,23 @@
 * Fix various memory leaks
 
 * Plenty of code cleanups, and performance improvements
+
+* Some macros were changed to inline functions.  This has to potential to
+  impact some code that made assumptions about the implementation.  Some
+  potentially impacted macros include:
+      jas_matrix_numrows, jas_matrix_numcols
+      jas_matrix_get
+      jas_seq_get, jas_seq_start, jas_seq_end
+      jpc_ms_gettype
+      jas_matrix_set and jas_seq_set is affected differently; the old macro was
+      an actual expression returning the value, while the new function does not.
+  The following macros have been changed, too, but are likely not
+  affected, since they have been an rvalue-expression anyway:
+      JP2_DTYPETOBPC, JP2_BPCTODTYPE
+      JAS_IMAGE_CDT_{SETSGND,GETSGND,SETPREC,GETPREC}
+      jas_image_cmptdtype
+      macros from here
+      jas_matrix_setv, jas_matrix_getvref
+      jas_matrix_bind{row,col}
+      the jpc_fix_ family
+      the JPC_QCX and JPC_COX families
