@@ -3,19 +3,10 @@ name: release
 on:
   push:
     tags:
-<<<<<<< HEAD
-      - 'version-*.*.*'
-      - '!version-*.*.*-rc*'
-      - 'v*.*.*'
-      - '!v*.*.*-rc*'
-      - 'tmp-v*.*.*'
-      - '!tmp-v*.*.*-rc*'
-=======
       - version-[0-9]+.[0-9]+.[0-9]+
       - version-[0-9]+.[0-9]+.[0-9]+-rc[0-9]+
       - version-[0-9]+.[0-9]+.[0-9]+-alpha[0-9]+
       - version-[0-9]+.[0-9]+.[0-9]+-beta[0-9]+
->>>>>>> master
 
 jobs:
   build:
