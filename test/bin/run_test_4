@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /@unixroot/usr/bin/env bash
 # Copyright (c) 2016 Michael David Adams
 ################################################################################
 
@@ -51,10 +51,10 @@ fi
 
 jpdec="$cmd_dir/jpdec"
 dec=jasper
-imgcmp="$abs_top_builddir/src/app/imgcmp"
-imginfo="$abs_top_builddir/src/app/imginfo"
+imgcmp="$abs_top_builddir/src/app/imgcmp.exe"
+imginfo="$abs_top_builddir/src/app/imginfo.exe"
 export IMGINFO_COMMAND="$imginfo"
-jasper="$abs_top_builddir/src/app/jasper"
+jasper="$abs_top_builddir/src/app/jasper.exe"
 
 
 testcase_file="$cmd_dir/decoder_tests"
@@ -77,9 +77,9 @@ for testcase in "${testcases[@]}"; do
 		imginfo_opts+=(--debug-level "$debug_level")
 	fi
 	if [ "$verbose" -ge 1 ]; then
-		echo "Running $imginfo ${imginfo_opts[@]} < $enc_file"
+		echo "Running $imginfo$EXEEXT ${imginfo_opts[@]} < $enc_file"
 	fi
-	"$imginfo" "${imginfo_opts[@]}" < "$enc_file"
+	"$imginfo$EXEEXT" "${imginfo_opts[@]}" < "$enc_file"
 	status=$?
 	if [ "$status" -ne 0 ]; then
 		echo "error: cannot decode $enc_file"
@@ -123,7 +123,7 @@ for testcase in "${testcases[@]}"; do
 	num_comps=$(image_info "$enc_file" num_components) || \
 	  panic "cannot get number of image components"
 	format=$(image_info "$enc_file" format) || panic "cannot get image format"
-	buffer=$("$imginfo" < "$enc_file")
+	buffer=$("$imginfo$EXEEXT" < "$enc_file")
 	echo "IMAGE INFO width=$width height=$height prec=$depth num_components=$num_comps"
 	echo "IMAGE INFO $buffer"
 #continue

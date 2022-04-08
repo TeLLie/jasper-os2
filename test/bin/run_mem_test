@@ -39,11 +39,11 @@ op=decode
 out_format=jp2
 
 if [ -n "$JAS_ABS_TOP_BUILDDIR" ]; then
-	imginfo_program="$JAS_ABS_TOP_BUILDDIR/src/app/imginfo"
-	jasper_program="$JAS_ABS_TOP_BUILDDIR/src/app/jasper"
+	imginfo_program="$JAS_ABS_TOP_BUILDDIR/src/app/imginfo$EXEEXT"
+	jasper_program="$JAS_ABS_TOP_BUILDDIR/src/app/jasper$EXEEXT"
 else
-	imginfo_program="$program_dir/../../tmp_cmake/build/src/app/imginfo"
-	jasper_program="$program_dir/../../tmp_cmake/build/src/app/jasper"
+	imginfo_program="$program_dir/../../tmp_cmake/build/src/app/imginfo$EXEEXT"
+	jasper_program="$program_dir/../../tmp_cmake/build/src/app/jasper$EXEEXT"
 fi
 image_file=
 

@@ -17,8 +17,8 @@ fi
 
 set_source_and_build_dirs || panic "cannot set source and build directories"
 
-imginfo="$abs_top_builddir/src/app/imginfo"
-jasper="$abs_top_builddir/src/app/jasper"
+imginfo="$abs_top_builddir/src/app/imginfo.exe"
+jasper="$abs_top_builddir/src/app/jasper.exe"
 
 data_dir="$abs_top_srcdir/data"
 
@@ -103,9 +103,9 @@ while IFS= read -r line; do
 	fi
 	image_file="$data_dir/$file"
 	if [ "$verbose" -ge 2 ]; then
-		echo "Running $imginfo < $image_file"
+		echo "Running $imginfo$EXEEXT < $image_file"
 	fi
-	buffer=$("$imginfo" "${imginfo_options[@]}" < "$image_file")
+	buffer=$("$imginfo$EXEEXT" "${imginfo_options[@]}" < "$image_file")
 	status=$?
 	if [ "$status" -ne 0 ]; then
 		failed_tests+=("$file")

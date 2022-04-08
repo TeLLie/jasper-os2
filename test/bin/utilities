@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /@unixroot/usr/bin/env bash
 # Copyright (c) 2016 Michael David Adams
 
 ################################################################################
@@ -96,12 +96,12 @@ function image_info()
 	local value
 	local imginfo="${IMGINFO_COMMAND:-imginfo}"
 	eecho "invoked image_info with file=$file key=$key"
-	if [ ! -x "$imginfo" ]; then
-		eecho "cannot find command $imginfo"
+	if [ ! -x "$imginfo$EXEEXT" ]; then
+		eecho "cannot find command $imginfo$EXEEXT"
 		return 1
 	fi
-	#local buffer=$("$imginfo" < "$file" 2> /dev/null) || return 1
-	local buffer=$("$imginfo" < "$file") || return 1
+	#local buffer=$("$imginfo$EXEEXT" < "$file" 2> /dev/null) || return 1
+	local buffer=$("$imginfo$EXEEXT" < "$file") || return 1
 	case "$key" in
 	format)
 		value=$(awk '{print $1}' <<< "$buffer") || return 1
