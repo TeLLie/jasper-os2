@@ -397,8 +397,6 @@ inline static bool jas_safe_uint_mul(unsigned x, unsigned y, unsigned *result)
 }
 #endif
 
-<<<<<<< HEAD
-=======
 /******************************************************************************\
 * Safe integer arithmetic (i.e., with overflow checking).
 \******************************************************************************/
@@ -508,7 +506,6 @@ int jas_safeui64_to_int(jas_safeui64_t x, int invalid_value)
 /******************************************************************************\
 \******************************************************************************/
 
->>>>>>> master
 #ifdef __cplusplus
 }
 #endif

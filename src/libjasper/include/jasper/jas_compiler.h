@@ -96,20 +96,6 @@
 #	define JAS_FORCE_INLINE inline
 #endif
 
-<<<<<<< HEAD
-#ifdef __GNUC__
-#define JAS_DEPRECATED __attribute__((deprecated))
-#define JAS_ATTRIBUTE_CONST __attribute__((const))
-#define JAS_ATTRIBUTE_PURE __attribute__((pure))
-#define JAS_FORCE_INLINE inline __attribute__((always_inline))
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
-#define JAS_UNREACHABLE() __builtin_unreachable()
-#else
-#define JAS_UNREACHABLE()
-#endif
-#define JAS_LIKELY(x) __builtin_expect (!!(x), 1)
-#define JAS_UNLIKELY(x) __builtin_expect (!!(x), 0)
-=======
 #if defined(__GNUC__)
 #	if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5)
 #		define JAS_UNREACHABLE() __builtin_unreachable()
@@ -120,7 +106,6 @@
 #		define JAS_UNREACHABLE() __builtin_unreachable()
 #elif defined(_MSC_VER)
 #	define JAS_UNREACHABLE() __assume(0)
->>>>>>> master
 #else
 #	define JAS_UNREACHABLE()
 #endif
@@ -131,8 +116,6 @@
 #	define JAS_LIKELY(x) (x)
 #endif
 
-<<<<<<< HEAD
-=======
 #if defined(__GNUC__)
 #	define JAS_UNLIKELY(x) __builtin_expect (!!(x), 0)
 #else
@@ -149,20 +132,16 @@
 #	define JAS_ATTRIBUTE_DISABLE_UBSAN
 #endif
 
->>>>>>> master
 #ifdef __has_builtin
 #define jas_has_builtin(x) __has_builtin(x)
 #else
 #define jas_has_builtin(x) 0
 #endif
 
-<<<<<<< HEAD
-=======
 /*!
 @brief
 Indicate that a variable may be unused (in order to avoid a compiler warning).
 */
 #define JAS_UNUSED(x) ((void) x)
 
->>>>>>> master
 #endif
