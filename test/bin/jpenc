@@ -1,5 +1,10 @@
-#! /bin/bash
+#! /usr/bin/env bash
 # Copyright (c) 2016 Michael David Adams
+
+debug_level="${JAS_DEBUG_LEVEL:-0}"
+if [ "$debug_level" -ge 1 ]; then
+	set -xv
+fi
 
 cmd_dir=$(dirname "$0") || exit 1
 source "$cmd_dir/utilities" || exit 1
@@ -10,8 +15,8 @@ set_source_and_build_dirs || panic "cannot set source and build directories"
 init
 VERBOSE=0
 
-export IMGINFO_COMMAND="$abs_top_builddir/src/appl/imginfo"
-JASPER="$abs_top_builddir/src/appl/jasper"
+export IMGINFO_COMMAND="$abs_top_builddir/src/app/imginfo"
+JASPER="$abs_top_builddir/src/app/jasper"
 
 ################################################################################
 #
@@ -655,10 +660,10 @@ oj_enc()
 	fi
 
 	if [ -n "$ILYRRATES" ]; then
-		BUF=$(echo "${ILYRRATES},$RATE" | csltowsl | reciprocatewsl | wsltocsl) || panic
+		BUF=$(echo "${ILYRRATES},$RATE" | csltowsl | reciprocatewsl | wsltocsl) || panic "processing failed"
 		oj_encode_opts+=(-r "$BUF")
 	else
-		BUF=$(echo "$RATE" | reciprocatewsl) || panic
+		BUF=$(echo "$RATE" | reciprocatewsl) || panic "processing failed"
 		oj_encode_opts+=(-r "$BUF")
 	fi
 	oj_encode_opts+=(-b "$CBLKHEIGHT,$CBLKWIDTH")
@@ -678,7 +683,7 @@ oj_enc()
 			oj_encode_opts+=(-mct 1)
 		fi
 	fi
-	PRG=$(echo "$PRG" | to_upper) || panic
+	PRG=$(echo "$PRG" | to_upper) || panic "to_upper failed"
 	oj_encode_opts+=(-p "$PRG")
 	#oj_encode_opts+=()
 	echo "Running $oj_encode ${oj_encode_opts[@]}"

@@ -80,7 +80,11 @@ name="jasper-$version"
 source_dir="$tmp_dir/$name"
 build_dir="$tmp_dir/build"
 install_dir="$tmp_dir/install"
+<<<<<<< HEAD
 news_file="$workspace_dir/NEWS"
+=======
+news_file="$workspace_dir/NEWS.txt"
+>>>>>>> master
 changelog_file="$source_dir/ChangeLog"
 release_notes_file="$out_dir/release_notes.txt"
 archive_file="$out_dir/${name}.tar.gz"
@@ -132,6 +136,7 @@ cp -a "$build_dir/doc/html/." "$out_dir/doc/html" || \
 #  panic "cannot move manual.pdf"
 
 remove_list=()
+<<<<<<< HEAD
 remove_list+=(appveyor.yml)
 remove_list+=(.github)
 remove_list+=(.travis.yml)
@@ -142,6 +147,25 @@ remove_list+=(build/appveyor)
 remove_list+=(build/travis)
 remove_list+=(build/make_dist)
 remove_list+=(data/test/bad/1_crash.jpg)
+=======
+
+remove_list+=(appveyor.yml)
+remove_list+=(.gitattributes)
+remove_list+=(.github)
+remove_list+=(.gitignore)
+remove_list+=(.travis.yml)
+
+remove_list+=(build/appveyor)
+remove_list+=(build/extract_release_notes)
+remove_list+=(build/github)
+remove_list+=(build/make_dist)
+remove_list+=(build/make_release)
+remove_list+=(build/my_build)
+remove_list+=(build/travis)
+
+remove_list+=(data/test/bad/1_crash.jpg)
+
+>>>>>>> master
 for file in "${remove_list[@]}"; do
 	if [ ! -e "$source_dir/$file" ]; then
 		warn "missing file/directory $file"

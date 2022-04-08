@@ -21,6 +21,20 @@ join_by()
 	echo "$*"
 }
 
+<<<<<<< HEAD
+=======
+is_preview_release()
+{
+	local version="$1"
+	local pattern='^version-[0-9]+\.[0-9]+\.[0-9]+$'
+	if [[ "$version" =~ $pattern ]]; then
+		output="0"
+	else
+		output="1"
+	fi
+	echo "$output"
+}
+>>>>>>> master
 
 # Print usage information and exit.
 usage()
@@ -70,6 +84,13 @@ usage()
 # Parse command line.
 ################################################################################
 
+<<<<<<< HEAD
+=======
+program_dir="$(dirname "$0")" || panic
+make_main_gh_page="$program_dir/make_main_gh_page"
+
+latest=
+>>>>>>> master
 branch="gh-pages"
 in_dir=
 repo_name=
@@ -80,8 +101,17 @@ prepare_only=0
 verbose=1
 deploy_mode=
 
+<<<<<<< HEAD
 while getopts b:i:r:t:z:fnvqm: opt; do
 	case $opt in
+=======
+while getopts b:i:r:t:z:fnvqm:lL opt; do
+	case $opt in
+	L)
+		latest=0;;
+	l)
+		latest=1;;
+>>>>>>> master
 	m)
 		deploy_mode="$OPTARG";;
 	v)
@@ -163,10 +193,27 @@ if [ "$verbose" -ge 1 ]; then
 	echo "version $version"
 fi
 
+<<<<<<< HEAD
 tmp_dir="$tmp_dir/deploy"
 
 git_dir="$tmp_dir/git"
 version_dir="$git_dir/$version"
+=======
+preview_release="$(is_preview_release "$version")" || \
+  panic "cannot determine if release is preview release"
+
+if [ -z "$latest" ]; then
+	latest=1
+	if [ "$preview_release" -ne 0 ]; then
+		latest=0
+	fi
+fi
+
+tmp_dir="$tmp_dir/deploy"
+
+git_dir="$tmp_dir/git"
+version_dir="$git_dir/releases/$version"
+>>>>>>> master
 github_host="github.com"
 github_user="git"
 
@@ -273,7 +320,14 @@ git -C "$git_dir" config --local user.name "Michael Adams" || \
 git -C "$git_dir" config --local user.email "mdadams@ece.uvic.ca" || \
   panic "cannot set Git user email"
 
+<<<<<<< HEAD
 # Add the content for the new release.
+=======
+################################################################################
+# Add the content for the new release.
+################################################################################
+
+>>>>>>> master
 if [ -e "$version_dir" ]; then
 	panic "directory already exist for $version"
 fi
@@ -282,6 +336,7 @@ mkdir -p "$version_dir" || \
 (cd "$in_dir" && tar -cf - .) | (cd "$version_dir" && tar -xf -) || \
   panic "tar failed"
 
+<<<<<<< HEAD
 # Update the symlink for the latest release.
 target="$git_dir/latest"
 if [ -h "$target" -o -e "$target" ]; then
@@ -300,19 +355,44 @@ index_html_data='
 '
 
 # Add a top-level index.html file to redirect to the latest release.
+=======
+if [ "$latest" -ne 0 ]; then
+	# Update the symlink for the latest release.
+	target="$git_dir/latest"
+	if [ -h "$target" -o -e "$target" ]; then
+		rm -f "$target" || panic "rm failed"
+	fi
+	ln -s "releases/$version/html" "$target" || \
+	  panic "ln failed"
+fi
+
+# Add a top-level index.html file.
+>>>>>>> master
 target="$git_dir/index.html"
 if [ -e "$target" ]; then
 	rm -f "$target" || panic "cannot remove $target"
 fi
+<<<<<<< HEAD
 cat > "$target" <<< "$index_html_data" || \
   panic "cannot create index.html"
 #cp "$top_dir/sources/index.html" "$target" || panic "cannot copy $target"
+=======
+"$make_main_gh_page" -d "$git_dir" > "$target" || \
+  panic "cannot create index.html"
+>>>>>>> master
 
 if [ "$verbose" -ge 2 ]; then
 	ls -al "$git_dir"/*
 fi
 
+<<<<<<< HEAD
 # Commit and push all of the changes.
+=======
+################################################################################
+# Commit and push all of the changes.
+################################################################################
+
+>>>>>>> master
 git -C "$git_dir" add . || \
   panic "git add failed"
 git -C "$git_dir" commit -m "Deploying release $version" || \

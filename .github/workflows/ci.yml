@@ -1,20 +1,45 @@
 name: ci
 
+<<<<<<< HEAD
 on: [push]
+=======
+on: [push, pull_request]
+>>>>>>> master
 
 jobs:
   build:
     strategy:
       matrix:
+<<<<<<< HEAD
         #os: [ubuntu-latest, macos-latest, windows-latest]
         os: [ubuntu-latest]
         compiler: [gcc, clang]
+=======
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        include:
+          - os: [windows-2022]
+>>>>>>> master
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+<<<<<<< HEAD
+=======
+    ############################################################
+    - name: prebuild
+      shell: bash
+      run: build/github/prebuild-v2 -c '${{runner.temp}}'/commands
+    ############################################################
+>>>>>>> master
     - name: testing
       env:
         CC: ${{ matrix.compiler }}
       shell: bash
+<<<<<<< HEAD
       run: build/my_build -A -U -d -t
+=======
+      #run: build/build_all -v -d 2
+      run: build/build_all -C '${{runner.temp}}'/commands
+    ############################################################
+>>>>>>> master

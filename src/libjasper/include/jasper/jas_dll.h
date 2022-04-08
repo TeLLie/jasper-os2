@@ -65,29 +65,11 @@
 /* The configuration header file should be included first. */
 #include <jasper/jas_config.h>
 
-#if defined(JAS_DLL)
-	#if defined(_WIN32)
-		#if defined(JAS_BUILDING_DLL)
-			#define JAS_DLLEXPORT __declspec(dllexport)
-		#else
-			#define JAS_DLLEXPORT __declspec(dllimport)
-		#endif
-		#define JAS_DLLLOCAL
-	#elif defined(JAS_HAVE_VISIBILITY)
-		#if defined(JAS_BUILDING_DLL)
-			#define JAS_DLLEXPORT __attribute__ ((visibility("default")))
-			#define JAS_DLLLOCAL __attribute__ ((visibility("hidden")))
-		#else
-			#define JAS_DLLEXPORT
-			#define JAS_DLLLOCAL
-		#endif
-	#else
-		#define JAS_DLLEXPORT
-		#define JAS_DLLLOCAL
-	#endif
-#else
-	#define JAS_DLLEXPORT
-	#define JAS_DLLLOCAL
-#endif
+#include <jasper/jas_export_cmake.h>
+
+/* For backward compatibility only. */
+#define JAS_DLLEXPORT JAS_EXPORT
+/* For backward compatibility only. */
+#define JAS_DLLLOCAL JAS_LOCAL
 
 #endif
