@@ -268,11 +268,7 @@ jas_image_t *jpg_decode(jas_stream_t *in, const char *optstr)
 	  );
 
 	if (!cinfo.image_width || !cinfo.image_height || !cinfo.num_components) {
-<<<<<<< HEAD
-		jas_eprintf("image has no samples");
-=======
 		jas_logerrorf("image has no samples");
->>>>>>> master
 		goto error;
 	}
 	if (opts.max_samples > 0) {
