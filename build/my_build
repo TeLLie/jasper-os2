@@ -138,26 +138,6 @@ configure_opts+=(-H"$source_dir")
 #	configure_opts+=("-DCMAKE_C_COMPILER=$sde_gcc")
 #fi
 configure_opts+=("-DCMAKE_INSTALL_PREFIX=$install_dir")
-<<<<<<< HEAD
-configure_opts+=("-DJAS_ENABLE_STRICT=true")
-if [ "$enable_debug" -ne 0 ]; then
-	configure_opts+=("-DCMAKE_BUILD_TYPE=Debug")
-	configure_opts+=("-DJAS_ENABLE_SHARED=false")
-else
-	configure_opts+=("-DCMAKE_BUILD_TYPE=Release")
-fi
-if [ "$enable_asan" -ne 0 ]; then
-	configure_opts+=("-DJAS_ENABLE_ASAN=true")
-fi
-if [ "$enable_usan" -ne 0 ]; then
-	configure_opts+=("-DJAS_ENABLE_USAN=true")
-fi
-configure_opts+=("-DJAS_ENABLE_DANGEROUS_INTERNAL_TESTING_MODE=true")
-configure_opts+=("$@")
-echo "Running cmake ${configure_opts[@]}"
-cmake "${configure_opts[@]}" || panic "cmake failed"
-
-=======
 if [ "$enable_debug" -ne 0 ]; then
 	configure_opts+=("-DCMAKE_BUILD_TYPE=Debug")
 else
@@ -203,27 +183,12 @@ if [ "$configure_only" -ne 0 ]; then
 	exit
 fi
 
->>>>>>> master
 build_opts=()
 install_opts=()
 if [ "$verbose" -ne 0 ]; then
 	build_opts+=(--verbose)
 	install_opts+=(--verbose)
 fi
-<<<<<<< HEAD
-cmake --build "$build_dir" --clean-first \
-  "${build_opts[@]}" || \
-  panic "cmake build failed"
-
-cmake --build "$build_dir" --target install \
-  "${install_opts[@]}" || \
-  panic "cmake install failed"
-
-test_opts=()
-test_opts+=(--output-on-failure)
-if [ "$do_make_test" -ne 0 ]; then
-	(cd "$build_dir" && ctest "${test_opts[@]}") || panic "ctest failed"
-=======
 command=(cmake)
 command+=(--build "$build_dir")
 command+=(--clean-first)
@@ -261,5 +226,4 @@ if [ "$do_make_test" -ne 0 ]; then
 	if [ "$enable" -ne 0 ]; then
 		(cd "$build_dir" && "${command[@]}") || panic "ctest failed"
 	fi
->>>>>>> master
 fi
