@@ -89,7 +89,11 @@
 #include <stdatomic.h>
 #elif defined(JAS_THREADS_PTHREAD)
 #include <pthread.h>
-#include <sched.h>
+# ifndef __KLIBC__
+#  include <sched.h>
+# else
+#  define sched_yield() pthread_yield()
+# endif
 #elif defined(JAS_THREADS_WIN32)
 #include <process.h>
 #include <windows.h>
