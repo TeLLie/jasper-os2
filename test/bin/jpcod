@@ -1,5 +1,10 @@
-#! /bin/bash
+#! /usr/bin/env bash
 # Copyright (c) 2016 Michael David Adams
+
+debug_level="${JAS_DEBUG_LEVEL:-0}"
+if [ "$debug_level" -ge 1 ]; then
+	set -xv
+fi
 
 ################################################################################
 # Basic initialization.
@@ -30,21 +35,21 @@ init()
 	SHOWIMG="display -geometry 256x256> -geometry +0+0"
 
 	#IMGDIR=$JASPERTOPDIR/data/images
-	#JASPER=$JASPERTOPDIR/src/appl/jasper$EXEEXT
-	#JIV=$JASPERTOPDIR/src/appl/jiv$EXEEXT
-	#IMGCMP=$JASPERTOPDIR/src/appl/imgcmp$EXEEXT
-	#IMGINFO=$JASPERTOPDIR/src/appl/imginfo$EXEEXT
+	#JASPER=$JASPERTOPDIR/src/app/jasper$EXEEXT
+	#JIV=$JASPERTOPDIR/src/app/jiv$EXEEXT
+	#IMGCMP=$JASPERTOPDIR/src/app/imgcmp$EXEEXT
+	#IMGINFO=$JASPERTOPDIR/src/app/imginfo$EXEEXT
 	IMGDIR=`parsepathname $JASPERTOPDIR/data/images`
-	JASPER=`parsepathname $JASPERTOPDIR/src/appl/jasper$EXEEXT`
-	JIV=`parsepathname $JASPERTOPDIR/src/appl/jiv$EXEEXT`
-	IMGCMP=`parsepathname $JASPERTOPDIR/src/appl/imgcmp$EXEEXT`
-	IMGINFO=`parsepathname $JASPERTOPDIR/src/appl/imginfo$EXEEXT`
+	JASPER=`parsepathname $JASPERTOPDIR/src/app/jasper$EXEEXT`
+	JIV=`parsepathname $JASPERTOPDIR/src/app/jiv$EXEEXT`
+	IMGCMP=`parsepathname $JASPERTOPDIR/src/app/imgcmp$EXEEXT`
+	IMGINFO=`parsepathname $JASPERTOPDIR/src/app/imginfo$EXEEXT`
 	KAKADUENC=$KAKADUTOPDIR/kdu_compress$EXEEXT
 	KAKADUDEC=$KAKADUTOPDIR/kdu_expand$EXEEXT
 	VMENC=$VMTOPDIR/bin/vm9_compress_32$EXEEXT
 	VMDEC=$VMTOPDIR/bin/vm9_expand_32$EXEEXT
 	JJCOD=$CMDDIR/jj2k
-	IMGPATH="$IMGDIR:${IMGDIR}2:$ALTIMGDIR"
+	IMGPATH="$IMGDIR;${IMGDIR}2;$ALTIMGDIR"
 
 }
 

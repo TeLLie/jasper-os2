@@ -9,23 +9,84 @@ panic()
 cmd_dir=$(dirname "$0") || exit 1
 abs_cmd_dir=$(readlink -f "$cmd_dir") || panic
 
-do_install=0
+usage()
+{
+	echo "bad usage: $@"
+	exit 2
+}
+
+enable=1
+enable_install=0
 enable_debug=0
 do_make_test=0
 verbose=0
 enable_asan=0
-enable_usan=0
-sde_top_dir="$HOME/public/sde"
-#sde_top_dir=""
+enable_lsan=0
+enable_ubsan=0
+enable_tsan=0
+enable_shared=1
+sde_top_dir=
+configure_only=0
+enable_doc=0
+use_pthread=0
 
-while getopts E:AUditv opt; do
+while getopts m:PE:AULTditvCDnS: opt; do
 	case $opt in
+	S)
+		enable_shared="$OPTARG";;
+	P)
+		use_pthread=1;;
+	n)
+		enable=0;;
+	m)
+		case "$OPTARG" in
+		tsan)
+			enable_tsan=1
+			enable_asan=0
+			enable_lsan=0
+			enable_ubsan=1
+			enable_doc=0
+			enable_debug=1
+			enable_install=1
+			use_pthread=1
+			;;
+		debug)
+			enable_tsan=0
+			enable_asan=1
+			enable_lsan=1
+			enable_ubsan=1
+			enable_doc=0
+			enable_debug=1
+			enable_install=1
+			;;
+		release)
+			enable_tsan=0
+			enable_asan=1
+			enable_lsan=1
+			enable_ubsan=1
+			enable_doc=0
+			enable_debug=0
+			enable_install=1
+			;;
+		*)
+			usage
+			;;
+		esac
+		;;
 	A)
 		enable_asan=1;;
+	L)
+		enable_lsan=1;;
 	U)
-		enable_usan=1;;
+		enable_ubsan=1;;
+	T)
+		enable_tsan=1;;
+	C)
+		configure_only=1;;
+	D)
+		enable_doc=1;;
 	i)
-		do_install=1;;
+		enable_install=1;;
 	d)
 		enable_debug=1;;
 	t)
@@ -41,10 +102,11 @@ while getopts E:AUditv opt; do
 done
 shift $((OPTIND - 1))
 
-if [ "$enable_debug" -ne 0 ]; then
-	enable_asan=1
-	enable_usan=1
-fi
+#if [ "$enable_debug" -ne 0 ]; then
+#	enable_asan=1
+#	enable_lsan=1
+#	enable_ubsan=1
+#fi
 
 source_dir="$abs_cmd_dir/.."
 tmp_dir="$source_dir/tmp_cmake"
@@ -58,59 +120,110 @@ if [ -n "$CC" ]; then
 	echo "C compiler $CC"
 fi
 
-#sde_gcc="$sde_top_dir/bin/gcc"
-sde_setup="$sde_top_dir/bin/sde_make_setup"
-eval $("$sde_setup") || panic "setup failed"
+if [ -n "$sde_top_dir" ]; then
+	#sde_gcc="$sde_top_dir/bin/gcc"
+	sde_setup="$sde_top_dir/bin/sde_make_setup"
+	eval $("$sde_setup") || panic "setup failed"
+fi
 
 if [ -e "$tmp_dir" ]; then
 	echo "Removing $tmp_dir"
 	rm -rf "$tmp_dir" || panic "cannot remove directory $tmp_dir"
 fi
 
-opts=()
-opts+=(-B"$build_dir")
-opts+=(-H"$source_dir")
+configure_opts=()
+configure_opts+=(-B"$build_dir")
+configure_opts+=(-H"$source_dir")
 #if [ -n "$sde_top_dir" ]; then
-#	opts+=("-DCMAKE_C_COMPILER=$sde_gcc")
+#	configure_opts+=("-DCMAKE_C_COMPILER=$sde_gcc")
 #fi
-opts+=("-DCMAKE_INSTALL_PREFIX=$install_dir")
-opts+=("-DJAS_ENABLE_STRICT=true")
+configure_opts+=("-DCMAKE_INSTALL_PREFIX=$install_dir")
 if [ "$enable_debug" -ne 0 ]; then
-	opts+=("-DCMAKE_BUILD_TYPE=Debug")
-	opts+=("-DJAS_ENABLE_SHARED=false")
+	configure_opts+=("-DCMAKE_BUILD_TYPE=Debug")
 else
-	opts+=("-DCMAKE_BUILD_TYPE=Release")
+	configure_opts+=("-DCMAKE_BUILD_TYPE=Release")
+fi
+if [ "$enable_shared" -ne 0 ]; then
+	configure_opts+=("-DJAS_ENABLE_SHARED=true")
+else
+	configure_opts+=("-DJAS_ENABLE_SHARED=false")
 fi
 if [ "$enable_asan" -ne 0 ]; then
-	opts+=("-DJAS_ENABLE_ASAN=true")
+	configure_opts+=("-DJAS_ENABLE_ASAN=true")
 fi
-if [ "$enable_usan" -ne 0 ]; then
-	opts+=("-DJAS_ENABLE_USAN=true")
+if [ "$enable_tsan" -ne 0 ]; then
+	configure_opts+=("-DJAS_ENABLE_TSAN=true")
 fi
-opts+=("$@")
-echo "Running cmake ${opts[@]}"
-cmake "${opts[@]}" || panic "cmake failed"
+if [ "$enable_lsan" -ne 0 ]; then
+	configure_opts+=("-DJAS_ENABLE_LSAN=true")
+fi
+if [ "$enable_ubsan" -ne 0 ]; then
+	configure_opts+=("-DJAS_ENABLE_UBSAN=true")
+fi
+configure_opts+=("-DJAS_ENABLE_DANGEROUS_INTERNAL_TESTING_MODE=true")
+if [ "$enable_doc" -ne 0 ]; then
+	configure_opts+=("-DJAS_ENABLE_DOC=true")
+else
+	configure_opts+=("-DJAS_ENABLE_DOC=false")
+fi
+configure_opts+=("-DCMAKE_VERBOSE_MAKEFILE=true")
+if [ "$use_pthread" -ne 0 ]; then
+	configure_opts+=("-DJAS_PREFER_PTHREAD=true")
+fi
+configure_opts+=("$@")
+command=(cmake "${configure_opts[@]}")
+echo "============================================================"
+echo "RUNNING: ${command[@]}"
+echo "============================================================"
+if [ "$enable" -ne 0 ]; then
+	"${command[@]}" || panic "cmake failed"
+fi
 
-make_opts=()
-if [ "$verbose" -ne 0 ]; then
-	make_opts+=("VERBOSE=1")
+if [ "$configure_only" -ne 0 ]; then
+	exit
 fi
-targets=()
-targets+=(clean)
-targets+=(all)
-if [ "$do_install" -ne 0 ]; then
-	targets+=(install)
-fi
-for target in "${targets[@]}"; do
-	(cd "$build_dir" && make "$target" "${make_opts[@]}") || \
-	  panic "make $target failed"
-done
 
-make_opts=()
+build_opts=()
+install_opts=()
 if [ "$verbose" -ne 0 ]; then
-	make_opts+=("ARGS=-V")
+	build_opts+=(--verbose)
+	install_opts+=(--verbose)
 fi
+command=(cmake)
+command+=(--build "$build_dir")
+command+=(--clean-first)
+command+=("${build_opts[@]}")
+echo "============================================================"
+echo "RUNNING: ${command[@]}"
+echo "============================================================"
+if [ "$enable" -ne 0 ]; then
+	"${command[@]}" || \
+	  panic "cmake build failed"
+fi
+
+if [ "$enable_install" -ne 0 ]; then
+	command=(cmake)
+	command+=(--build "$build_dir")
+	command+=(--target install)
+	command+=("${install_opts[@]}")
+	echo "============================================================"
+	echo "RUNNING: ${command[@]}"
+	echo "============================================================"
+	if [ "$enable" -ne 0 ]; then
+		"${command[@]}" || \
+		  panic "cmake install failed"
+	fi
+fi
+
+test_opts=()
+test_opts+=(--output-on-failure)
+command=(ctest "${test_opts[@]}")
 if [ "$do_make_test" -ne 0 ]; then
-	(cd "$build_dir" && make test "${make_opts[@]}") || \
-	  panic "make test failed"
+	echo "============================================================"
+	echo "Testing"
+	echo "RUNNING: ${command[@]}"
+	echo "============================================================"
+	if [ "$enable" -ne 0 ]; then
+		(cd "$build_dir" && "${command[@]}") || panic "ctest failed"
+	fi
 fi

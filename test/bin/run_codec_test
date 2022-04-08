@@ -5,13 +5,18 @@ cmd_dir=$(dirname "$0") || exit 1
 source "$cmd_dir/utilities" || exit 1
 source "$cmd_dir/jpcod" || exit 1
 
+debug_level="${JAS_DEBUG_LEVEL:-0}"
+if [ "$debug_level" -ge 1 ]; then
+	set -xv
+fi
+
 set_source_and_build_dirs || panic "cannot set source and build directories"
 tmp_dir=$(make_tmp_dir)
 
 init
 
-export IMGINFO_COMMAND="$abs_top_builddir/src/appl/imginfo"
-IMGCMP="$abs_top_builddir/src/appl/imgcmp"
+export IMGINFO_COMMAND="$abs_top_builddir/src/app/imginfo"
+IMGCMP="$abs_top_builddir/src/app/imgcmp"
 
 MKDATA=1
 DATADIR="$tmp_dir"
@@ -64,7 +69,7 @@ while getopts d:e:i:vBE: opt; do
 	e)
 		enc="$OPTARG";;
 	i)
-		image_path="$image_path:$OPTARG";;
+		image_path="$image_path;$OPTARG";;
 	v)
 		verbose=$((verbose + 1));;
 	B)
@@ -287,7 +292,8 @@ for test in "${tests[@]}"; do
 	if [ $rate = 0 ]; then
 		target_size=0
 	else
-		target_size=$(evalexpr "$image_size * $rate + 1" | realtoint) || panic
+		target_size=$(evalexpr "$image_size * $rate + 1" | realtoint) || \
+		  panic "calculation failed"
 	fi
 
 	enc_file="$TMPDIR/test.$enc_fmt"
@@ -377,7 +383,8 @@ for test in "${tests[@]}"; do
 
 	FILE0=$(pnutod $in_file)
 	FILE1=$(pnutod $dec_file)
-	PAE=$($IMGCMP -f $FILE0 -F $FILE1 -m pae --max 2> /dev/null) || panic
+	PAE=$($IMGCMP -f $FILE0 -F $FILE1 -m pae --max 2> /dev/null) || \
+	  panic "image comparison failed"
 	if [ -z "$PAE" ]; then
 		echo "cannot get PAE $FILE0 $FILE1"
 		exit 1
