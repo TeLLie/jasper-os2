@@ -10,15 +10,7 @@ cmake_minimum_required(VERSION 3.12)
 # The major, minor, and micro version numbers of the project.
 set(JAS_VERSION_MAJOR 3)
 set(JAS_VERSION_MINOR 0)
-<<<<<<< HEAD
-set(JAS_VERSION_PATCH 33)
-
-# The project version.
-set(JAS_VERSION
-	"${JAS_VERSION_MAJOR}.${JAS_VERSION_MINOR}.${JAS_VERSION_PATCH}")
-=======
 set(JAS_VERSION_PATCH 3)
->>>>>>> master
 
 # The shared library versioning information.
 # Guidelines on how to change this information can be found below.
