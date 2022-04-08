@@ -382,11 +382,7 @@ jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr)
 	} else {
 		/* Check to ensure that CMAP/PCLR were initialized. */
 		if (!dec->cmap || !dec->pclr) {
-<<<<<<< HEAD
-			jas_eprintf("missing CMAP/PCLR box\n");
-=======
 			jas_logerrorf("missing CMAP/PCLR box\n");
->>>>>>> master
 			goto error;
 		}
 
@@ -407,10 +403,7 @@ jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr)
 				}
 				if (!(lutents = jas_alloc2(pclrd->numlutents,
 				  sizeof(int_fast32_t)))) {
-<<<<<<< HEAD
-=======
 					jas_logerrorf("error: cannot allocate LUT\n");
->>>>>>> master
 					goto error;
 				}
 				for (i = 0; i < pclrd->numlutents; ++i) {
@@ -420,14 +413,9 @@ jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr)
 				if (jas_image_depalettize(dec->image, cmapent->cmptno,
 				  pclrd->numlutents, lutents,
 				  JP2_BPCTODTYPE(pclrd->bpc[cmapent->pcol]), newcmptno)) {
-<<<<<<< HEAD
-					jas_eprintf("jas_image_depalettize failed\n");
-					jas_free(lutents);
-=======
 					jas_logerrorf("jas_image_depalettize failed\n");
 					jas_free(lutents);
 					jas_logerrorf("error: depalettize failed\n");
->>>>>>> master
 					goto error;
 				}
 				dec->chantocmptlut[channo] = newcmptno;
@@ -474,19 +462,6 @@ jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr)
 			uint_fast16_t channo = dec->cdef->data.cdef.ents[i].channo;
 			/* Is the channel number reasonable? */
 			if (channo >= dec->numchans) {
-<<<<<<< HEAD
-				jas_eprintf("error: invalid channel number in CDEF box (%d)\n",
-				  channo);
-				goto error;
-			}
-			unsigned compno = dec->chantocmptlut[channo];
-			if (compno >= jas_image_numcmpts(dec->image)) {
-				jas_eprintf(
-				  "error: invalid component reference in CDEF box (%d)\n",
-				  compno);
-				goto error;
-			}
-=======
 				jas_logerrorf("error: invalid channel number in CDEF box (%d)\n",
 				  channo);
 				goto error;
@@ -498,7 +473,6 @@ jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr)
 				  compno);
 				goto error;
 			}
->>>>>>> master
 			jas_image_setcmpttype(dec->image, compno,
 			  jp2_getct(jas_image_clrspc(dec->image),
 			  dec->cdef->data.cdef.ents[i].type,
@@ -508,11 +482,7 @@ jas_image_t *jp2_decode(jas_stream_t *in, const char *optstr)
 		for (i = 0; i < dec->numchans; ++i) {
 			unsigned compno = dec->chantocmptlut[i];
 			if (compno >= jas_image_numcmpts(dec->image)) {
-<<<<<<< HEAD
-				jas_eprintf(
-=======
 				jas_logerrorf(
->>>>>>> master
 				  "error: invalid component reference (%d)\n", compno);
 				goto error;
 			}
