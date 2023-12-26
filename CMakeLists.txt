@@ -806,7 +806,7 @@ if(JAS_ENABLE_SHARED)
 	# (but later on when installing)
 	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+	#set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 	# add the automatically determined parts of the RPATH
 	# which point to directories outside the build tree to the install RPATH
