@@ -1,3 +1,58 @@
+4.1.1 (2023-11-28)
+==================
+
+* Disallow in-source builds by default.
+* Fix a potential integer overflow problem in the jas_get_total_mem_size
+  function (for the Windows platform).
+
+4.1.0 (2023-11-04)
+==================
+
+* Add support for building several JasPer application programs for
+  WebAssembly target with WASI support.
+
+4.0.1 (2023-11-04)
+==================
+
+* Fix integer overflow bug in PNM decoder (#353).
+* Fix a few minor build issues.
+
+4.0.0 (2022-11-05)
+==================
+
+* Improve static linking (#336).
+* Fix path relocation in mingw environment (#335).
+* Improve logging and build scripts.
+* Improve JPEG-2000 conformance test results.
+* Enable PIC by default.
+* Fix memory leaks in function cmdopts_parse (#332) (CVE-2022-2963).
+* imgcmp:
+  + Add quiet (-q) option.
+  + Add debug-level option.
+  + Fix memory leak.
+* imginfo:
+  + Add quiet (-q) option.
+* Fix bug in parsing PGX header.
+* Fix integer overflow bug (#345) (CVE-2022-40755).
+
+3.0.6 (2022-07-13)
+==================
+
+* Fix bug in manual deployment script.
+
+3.0.5 (2022-06-23)
+==================
+
+* Fix a minor build issue (#328).
+
+3.0.4 (2022-06-02)
+==================
+
+* Eliminate some bogus calls to abort.
+* Fix a typo in jas_safeui64_div (#323).
+* Add some additional logging messages.
+* Fix the source of a potential compiler warning (#321).
+
 3.0.3 (2022-03-15)
 ==================
 
@@ -62,6 +117,7 @@ this manual is available online (for various JasPer releases) at:
 ===================
 
 * Fix potential null pointer dereference in the JP2/JPC decoder. (#269)
+  (CVE-2021-3443)
 * Fix ignoring of JAS_STREAM_FILEOBJ_NOCLOSE at stream close time. (#286)
 * Fix integral type sizing problem in JP2 codec. (#284)
 

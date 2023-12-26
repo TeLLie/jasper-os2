@@ -10,6 +10,7 @@ program_dir=$(dirname "$0") || exit 1
 jas_realpath="$program_dir/jas_realpath"
 abs_program_dir=$("$jas_realpath" "$program_dir") || panic
 build_program="$program_dir/build"
+sysinfo_program="$program_dir/sysinfo"
 
 list_directory()
 {
@@ -51,6 +52,9 @@ set_build_config()
 		command+=("${asan_option[@]}")
 		command+=("${lsan_option[@]}")
 		command+=("${test_option[@]}")
+		if [ "$id" = "static_debug_mt1" ]; then
+			command+=("${conformance_tests_option[@]}")
+		fi
 		command+=(--install)
 		command+=(--no-documentation)
 		command+=(--no-use-jas-init)
@@ -281,6 +285,15 @@ if [ -n "$command_file" ]; then
 	source "$command_file" || panic "source failed"
 fi
 
+sysinfo_data="$("$sysinfo_program" -a)" || \
+  panic "cannot get system information"
+cat <<- EOF
+================================================================================
+System Information
+$sysinfo_data
+================================================================================
+EOF
+
 os=unknown
 if [ -n "$RUNNER_OS" ]; then
 	case "$RUNNER_OS" in
@@ -306,6 +319,7 @@ if [ -n "$RUNNER_OS" ]; then
 		esac
 	fi
 fi
+#ubuntu_clang_hack=0
 
 ################################################################################
 
@@ -348,9 +362,16 @@ esac
 
 if [ "$enable_test" -ne 0 ]; then
 	test_option=(--test)
+	conformance_tests_option=(--conformance-tests)
 else
 	test_option=(--no-test)
+	conformance_tests_option=(--no-conformance-tests)
 fi
+case "$os" in
+windows)
+	conformance_tests_option=(--no-conformance-tests)
+	;;
+esac
 
 ################################################################################
 
@@ -360,6 +381,13 @@ File System Mount Information
 ================================================================================
 EOF
 mount || panic "mount failed"
+
+cat <<- EOF
+================================================================================
+System Information
+================================================================================
+EOF
+uname -a || panic "uname failed"
 
 ################################################################################
 
@@ -372,18 +400,18 @@ if [ "${#tests[@]}" -eq 0 ]; then
 	tests=()
 
 	# debug builds
-	if [ "$ubuntu_clang_hack" -eq 0 ]; then
-		tests+=(static_debug_mt0)
-		tests+=(static_debug_mt1)
-		tests+=(static_debug_ji_mt0)
-		tests+=(static_debug_ji_mt1)
-		tests+=(tsan)
-	fi
+	#if [ "$ubuntu_clang_hack" -eq 0 ]; then
+	#fi
+	tests+=(static_debug_mt0)
+	tests+=(static_debug_mt1)
+	tests+=(static_debug_ji_mt0)
+	tests+=(static_debug_ji_mt1)
+	tests+=(tsan)
 
 	# release builds
-	tests+=(shared_release_mt0)
-	tests+=(shared_release_mt1)
 	if [ "$ubuntu_clang_hack" -eq 0 ]; then
+		tests+=(shared_release_mt0)
+		tests+=(shared_release_mt1)
 		tests+=(static_release_mt0)
 		tests+=(static_release_mt1)
 	fi

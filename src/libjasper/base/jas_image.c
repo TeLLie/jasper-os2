@@ -861,7 +861,7 @@ int jas_image_getfmt(jas_stream_t *in)
 	  ++fmtinfo) {
 		if (fmtinfo->enabled && fmtinfo->ops.validate) {
 			/* Is the input data valid for this format? */
-			JAS_LOGDEBUGF(20, "testing for format %s ... ", fmtinfo->name);
+			JAS_LOGDEBUGF(20, "testing for format %s\n", fmtinfo->name);
 			if (!(*fmtinfo->ops.validate)(in)) {
 				JAS_LOGDEBUGF(20, "test succeeded\n");
 				return fmtinfo->id;
@@ -1007,7 +1007,9 @@ const jas_image_fmtinfo_t *jas_image_lookupfmtbyname(const char *name)
 static uint_fast32_t inttobits(jas_seqent_t v, unsigned prec, bool sgnd)
 {
 	uint_fast32_t ret;
-	ret = ((sgnd && v < 0) ? ((1 << prec) + v) : v) & JAS_ONES(prec);
+	assert(v >= 0 || sgnd);
+	ret = ((sgnd && v < 0) ? (JAS_POW2_X(jas_seqent_t, prec) + v) : v) &
+	  JAS_ONES(prec);
 	return ret;
 }
 
@@ -1597,7 +1599,7 @@ jas_image_t *jas_image_chclrspc(jas_image_t *image,
 		continuing would crash because we'd attempt to
 		obtain information about the first component
 		*/
-		return NULL;
+		return 0;
 	}
 
 	outimage = 0;
@@ -1640,7 +1642,8 @@ jas_image_t *jas_image_chclrspc(jas_image_t *image,
 	const unsigned vstep = jas_image_cmptvstep(inimage, 0);
 
 	if (!(inprof = jas_image_cmprof(inimage))) {
-		abort();
+		// formerly call to abort()
+		goto error;
 	}
 	const unsigned numinclrchans =
 	  jas_clrspc_numchans(jas_cmprof_clrspc(inprof));
@@ -1662,8 +1665,9 @@ jas_image_t *jas_image_chclrspc(jas_image_t *image,
 		cmptparm.height = height;
 		cmptparm.prec = prec;
 		cmptparm.sgnd = 0;
-		if (jas_image_addcmpt(outimage, -1, &cmptparm))
+		if (jas_image_addcmpt(outimage, -1, &cmptparm)) {
 			goto error;
+		}
 		jas_image_setcmpttype(outimage, i, JAS_IMAGE_CT_COLOR(i));
 	}
 #if 0
@@ -1691,7 +1695,8 @@ jas_image_t *jas_image_chclrspc(jas_image_t *image,
 
 	inpixmap.numcmpts = numinclrchans;
 	if (!(incmptfmts = jas_alloc2(numinclrchans, sizeof(jas_cmcmptfmt_t)))) {
-		abort();
+		// formerly call to abort()
+		goto error;
 	}
 	inpixmap.cmptfmts = incmptfmts;
 	for (unsigned i = 0; i < numinclrchans; ++i) {
@@ -1707,8 +1712,8 @@ jas_image_t *jas_image_chclrspc(jas_image_t *image,
 
 	outpixmap.numcmpts = numoutclrchans;
 	if (!(outcmptfmts = jas_alloc2(numoutclrchans, sizeof(jas_cmcmptfmt_t)))) {
-		/* TODO - return error instead of abort. */
-		abort();
+		// formerly call to abort()
+		goto error;
 	}
 	outpixmap.cmptfmts = outcmptfmts;
 

@@ -245,6 +245,9 @@ int pgx_validate(jas_stream_t *in)
 
 	/* Ensure that the signature is correct for this format. */
 	if (magic != PGX_MAGIC) {
+		JAS_LOGDEBUGF(20, "bad signature (0x%08lx != 0x%08lx)\n",
+		  JAS_CAST(unsigned long, magic),
+		  JAS_CAST(unsigned long, PGX_MAGIC));
 		return -1;
 	}
 
@@ -288,10 +291,6 @@ static int pgx_gethdr(jas_stream_t *in, pgx_hdr_t *hdr)
 		jas_logerrorf("cannot get precision\n");
 		goto error;
 	}
-	if (hdr->prec > 32) {
-		jas_logerrorf("unsupported precision\n");
-		goto error;
-	}
 	if (pgx_getuint32(in, &hdr->width)) {
 		jas_logerrorf("cannot get width\n");
 		goto error;
@@ -299,6 +298,13 @@ static int pgx_gethdr(jas_stream_t *in, pgx_hdr_t *hdr)
 	if (pgx_getuint32(in, &hdr->height)) {
 		jas_logerrorf("cannot get height\n");
 		goto error;
+	}
+	if (hdr->prec > 32) {
+		jas_logerrorf("unsupported precision (%d)\n", hdr->prec);
+		goto error;
+	}
+	if (jas_get_debug_level() >= 1) {
+		pgx_dumphdr(stderr, hdr);
 	}
 	return 0;
 
@@ -434,7 +440,7 @@ static int pgx_getsgnd(jas_stream_t *in, bool *sgnd)
 		}
 	} while (isspace(JAS_CAST(unsigned char, c)));
 
-#if 0
+#if 1
 	if (c == '+') {
 		*sgnd = false;
 	} else if (c == '-') {
@@ -447,12 +453,24 @@ static int pgx_getsgnd(jas_stream_t *in, bool *sgnd)
 		return 0;
 	}
 
+#if 0
 	while ((c = pgx_getc(in)) != EOF && !isspace(JAS_CAST(unsigned char, c))) {
 		;
 	}
 	if (c == EOF) {
 		goto error;
 	}
+#else
+	while ((c = pgx_getc(in)) != EOF && isspace(JAS_CAST(unsigned char, c))) {
+		;
+	}
+	if (c == EOF) {
+		goto error;
+	}
+	if (jas_stream_ungetc(in, c)) {
+		goto error;
+	}
+#endif
 #else
 	if (c == '+' || c == '-') {
 		*sgnd = (c == '-');

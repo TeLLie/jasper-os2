@@ -204,6 +204,9 @@ int main(int argc, char **argv)
 	jas_conf_set_allocator(&allocator.base);
 	jas_conf_set_debug_level(cmdopts->debug);
 	jas_conf_set_max_mem_usage(cmdopts->max_mem);
+	if (cmdopts->verbose < 0) {
+		jas_conf_set_vlogmsgf(jas_vlogmsgf_discard);
+	}
 	if (jas_init_library()) {
 		fprintf(stderr, "cannot initialize JasPer library\n");
 		exit(EXIT_FAILURE);
@@ -269,7 +272,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	if (cmdopts->verbose) {
+	if (cmdopts->verbose > 0) {
 		cmdinfo();
 	}
 
@@ -339,7 +342,9 @@ int main(int argc, char **argv)
 	if (cmdopts->srgb) {
 		jas_image_t *newimage;
 		jas_cmprof_t *outprof;
-		fprintf(stderr, "forcing conversion to sRGB\n");
+		if (cmdopts->verbose >= 1) {
+			fprintf(stderr, "forcing conversion to sRGB\n");
+		}
 		if (!(outprof = jas_cmprof_createfromclrspc(JAS_CLRSPC_SRGB))) {
 			fprintf(stderr, "cannot create sRGB profile\n");
 			exit(EXIT_FAILURE);
@@ -364,7 +369,7 @@ int main(int argc, char **argv)
 	jas_tmr_stop(&enctmr);
 	enctime = jas_tmr_get(&enctmr);
 
-	if (cmdopts->verbose) {
+	if (cmdopts->verbose > 0) {
 		fprintf(stderr, "decoding time = %f\n", dectime);
 		fprintf(stderr, "encoding time = %f\n", enctime);
 	}
@@ -390,6 +395,7 @@ cmdopts_t *cmdopts_parse(int argc, char **argv)
 	enum {
 		CMDOPT_HELP = 0,
 		CMDOPT_VERBOSE,
+		CMDOPT_QUIET,
 		CMDOPT_INFILE,
 		CMDOPT_INFMT,
 		CMDOPT_INOPT,
@@ -410,6 +416,8 @@ cmdopts_t *cmdopts_parse(int argc, char **argv)
 	static const jas_opt_t cmdoptions[] = {
 		{CMDOPT_HELP, "help", 0},
 		{CMDOPT_VERBOSE, "verbose", 0},
+		{CMDOPT_QUIET, "quiet", 0},
+		{CMDOPT_QUIET, "q", 0},
 		{CMDOPT_INFILE, "input", JAS_OPT_HASARG},
 		{CMDOPT_INFILE, "f", JAS_OPT_HASARG},
 		{CMDOPT_INFMT, "input-format", JAS_OPT_HASARG},
@@ -473,6 +481,9 @@ cmdopts_t *cmdopts_parse(int argc, char **argv)
 		case CMDOPT_VERBOSE:
 			cmdopts->verbose = 1;
 			break;
+		case CMDOPT_QUIET:
+			cmdopts->verbose = -1;
+			break;
 		case CMDOPT_VERSION:
 			cmdopts->version = 1;
 			break;
@@ -523,6 +534,7 @@ cmdopts_t *cmdopts_parse(int argc, char **argv)
 			cmdopts->enable_all_formats = 1;
 			break;
 		default:
+			cmdopts_destroy(cmdopts);
 			badusage();
 			break;
 		}
@@ -541,6 +553,7 @@ cmdopts_t *cmdopts_parse(int argc, char **argv)
 
 	if (!cmdopts->outfmt_str && !cmdopts->outfile) {
 		fprintf(stderr, "error: cannot determine output format\n");
+		cmdopts_destroy(cmdopts);
 		badusage();
 	}
 
@@ -579,7 +592,7 @@ void cmdinfo()
 }
 
 static const char *const helpinfo[] = {
-"The following options are supported:\n",
+"Some of the supported options include:\n",
 "    --help                  Print this help information and exit.\n",
 "    --version               Print version information and exit.\n",
 "    --verbose               Enable verbose mode.\n",
@@ -595,9 +608,7 @@ static const char *const helpinfo[] = {
 "                            (See below for the list of supported formats.)\n",
 "    --output-option $opt    Provide the option $opt to the encoder.\n",
 "    --force-srgb            Force conversion to the sRGB color space.\n",
-"Some of the above option names can be abbreviated as follows:\n",
-"    --input = -f, --input-format = -t, --input-option = -o,\n",
-"    --output = -F, --output-format = -T, --output-option = -O\n",
+"For additional information, please see the online documentation.\n",
 0
 };
 
@@ -610,6 +621,7 @@ void cmdusage()
 	for (i = 0, s = helpinfo[i]; s; ++i, s = helpinfo[i]) {
 		fprintf(stderr, "%s", s);
 	}
+	fprintf(stderr, "\n");
 
 	fprintf(stderr, "The following formats are supported:\n");
 	int fmtind;

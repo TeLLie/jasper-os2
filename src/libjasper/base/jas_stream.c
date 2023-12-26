@@ -459,6 +459,8 @@ static int easy_mkstemp(char *buffer, size_t size)
 	return open(buffer,
 	  O_CREAT | O_EXCL | O_RDWR | O_TRUNC | O_BINARY | O_CLOEXEC,
 	  JAS_STREAM_PERMS);
+#elif defined(JAS_WASI_LIBC)
+	return -1;
 #else
 #ifdef JAS_HAVE_MKOSTEMP
 	return mkostemp(buffer, O_CLOEXEC);
@@ -700,14 +702,15 @@ size_t jas_stream_read(jas_stream_t *stream, void *buf, size_t cnt)
 	return n;
 }
 
+/* TODO: The return type should probably be changed to size_t. */
 unsigned jas_stream_peek(jas_stream_t *stream, void *buf, size_t cnt)
 {
 	char *bufptr = buf;
 
-	const unsigned n = jas_stream_read(stream, bufptr, cnt);
+	const size_t n = jas_stream_read(stream, bufptr, cnt);
 
 	/* Put the characters read back onto the stream. */
-	for (unsigned i = n; i-- > 0;) {
+	for (size_t i = n; i-- > 0;) {
 		if (jas_stream_ungetc(stream, bufptr[i]) == EOF) {
 			return 0;
 		}
@@ -1165,7 +1168,6 @@ int jas_stream_display(jas_stream_t *stream, FILE *fp, int n)
 		m = JAS_MIN(n - i, 16);
 		for (j = 0; j < m; ++j) {
 			if ((c = jas_stream_getc(stream)) == EOF) {
-				abort();
 				return -1;
 			}
 			buf[j] = c;
