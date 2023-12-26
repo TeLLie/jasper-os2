@@ -22,6 +22,8 @@ data_dir="$abs_top_srcdir/data"
 
 test_program="$abs_top_builddir/src/app/multithread.exe"
 jasper_program="$abs_top_builddir/src/app/jasper.exe"
+#export IMGINFO_COMMAND="$imginfo"
+export JASPER_COMMAND="$jasper_program"
 
 ################################################################################
 
@@ -34,12 +36,14 @@ tmp_dir=$(make_tmp_dir)
 
 log_file=$tmp_dir/log
 
-"$jasper_program" --list-enabled-formats | grep -q jpg
-if [ $? -eq 0 ]; then
-	has_jpg_codec=1
-else
-	has_jpg_codec=0
-fi
+has_jpg_codec="$(is_supported_format jpg)" || \
+  panic "cannot determine if JPG is supported format"
+#"$jasper_program" --list-enabled-formats | grep -q jpg
+#if [ $? -eq 0 ]; then
+#	has_jpg_codec=1
+#else
+#	has_jpg_codec=0
+#fi
 
 echo "supports JPEG codec: $has_jpg_codec"
 

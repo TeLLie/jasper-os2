@@ -145,7 +145,7 @@ static int jas_cmpxformseq_insertpxform(jas_cmpxformseq_t *pxformseq,
 
 #define gampxformseq(prof)	((prof)->pxformseqs[SEQGAM])
 
-static jas_clrspc_t icctoclrspc(jas_iccsig_t iccclrspc, int refflag);
+static int icctoclrspc(jas_iccsig_t iccclrspc, jas_clrspc_t* clrspc, int refflag);
 static jas_cmpxform_t *jas_cmpxform_create0(void);
 static jas_cmpxform_t *jas_cmpxform_createshapmat(void);
 static void jas_cmshapmatlut_init(jas_cmshapmatlut_t *lut);
@@ -168,6 +168,8 @@ static const jas_cmpxformops_t shapmat_ops = {
 
 jas_cmprof_t *jas_cmprof_createfromclrspc(jas_clrspc_t clrspc)
 {
+	JAS_LOGDEBUGF(1, "jas_cmprof_createfromclrspc(%d)\n", clrspc);
+
 	jas_iccprof_t *iccprof;
 	jas_cmprof_t *prof;
 
@@ -203,6 +205,8 @@ error:
 
 static jas_cmprof_t *jas_cmprof_createsycc()
 {
+	JAS_LOGDEBUGF(1, "jas_cmprof_createsycc()\n");
+
 	jas_cmprof_t *prof = 0;
 	jas_cmpxform_t *fwdpxform = 0;
 	jas_cmpxform_t *revpxform = 0;
@@ -286,6 +290,8 @@ error:
 
 jas_cmprof_t *jas_cmprof_createfromiccprof(const jas_iccprof_t *iccprof)
 {
+	JAS_LOGDEBUGF(1, "jas_cmprof_createfromiccprof(%p)\n", iccprof);
+
 	jas_cmprof_t *prof;
 	jas_icchdr_t icchdr;
 	jas_cmpxformseq_t *fwdpxformseq;
@@ -304,8 +310,14 @@ jas_cmprof_t *jas_cmprof_createfromiccprof(const jas_iccprof_t *iccprof)
 		jas_logerrorf("error: cannot copy ICC profile\n");
 		goto error;
 	}
-	prof->clrspc = icctoclrspc(icchdr.colorspc, 0);
-	prof->refclrspc = icctoclrspc(icchdr.refcolorspc, 1);
+	if (icctoclrspc(icchdr.colorspc, &prof->clrspc, 0)) {
+		jas_logerrorf("error: unknown color profile\n");
+		goto error;
+	}
+	if (icctoclrspc(icchdr.refcolorspc, &prof->refclrspc, 1)) {
+		jas_logerrorf("error: unknown reference color profile\n");
+		goto error;
+	}
 	prof->numchans = jas_clrspc_numchans(prof->clrspc);
 	prof->numrefchans = jas_clrspc_numchans(prof->refclrspc);
 
@@ -721,11 +733,16 @@ static int jas_cmpxformseq_delete(jas_cmpxformseq_t *pxformseq, unsigned i)
 static int jas_cmpxformseq_appendcnvt(jas_cmpxformseq_t *pxformseq,
   unsigned dstclrspc, unsigned srcclrspc)
 {
+	JAS_UNUSED(pxformseq);
 	if (dstclrspc == srcclrspc) {
 		return 0;
 	}
+	/*
+	I think that this function should not be called if the source and
+	destination color spaces are of different types.
+	That is, it is considered a programmer error, not a run-time error.
+	*/
 	abort();
-	JAS_UNUSED(pxformseq);
 	return -1;
 }
 
@@ -1092,11 +1109,9 @@ static int jas_cmshapmat_invmat(jas_cmreal_t out[3][4], jas_cmreal_t in[3][4])
 	d = in[0][0] * (in[1][1] * in[2][2] - in[1][2] * in[2][1])
 	  - in[0][1] * (in[1][0] * in[2][2] - in[1][2] * in[2][0])
 	  + in[0][2] * (in[1][0] * in[2][1] - in[1][1] * in[2][0]);
-#if 0
-	jas_eprintf("delta=%f\n", d);
-#endif
 	if (JAS_ABS(d) < 1e-6) {
-		jas_logerrorf("jas_cmshapmat_invmat: matrix is not invertible\n");
+		jas_logerrorf("jas_cmshapmat_invmat: matrix is not invertible "
+		  "(determinant %a)\n", d);
 		return -1;
 	}
 	out[0][0] = (in[1][1] * in[2][2] - in[1][2] * in[2][1]) / d;
@@ -1128,27 +1143,32 @@ static int jas_cmshapmat_invmat(jas_cmreal_t out[3][4], jas_cmreal_t in[3][4])
 *
 \******************************************************************************/
 
-static jas_clrspc_t icctoclrspc(jas_iccsig_t iccclrspc, int refflag)
+static int icctoclrspc(jas_iccsig_t iccclrspc, jas_clrspc_t* clrspc, int refflag)
 {
 	if (refflag) {
 		switch (iccclrspc) {
 		case JAS_ICC_COLORSPC_XYZ:
-			return JAS_CLRSPC_CIEXYZ;
+			*clrspc = JAS_CLRSPC_CIEXYZ;
+			return 0;
 		case JAS_ICC_COLORSPC_LAB:
-			return JAS_CLRSPC_CIELAB;
+			*clrspc = JAS_CLRSPC_CIELAB;
+			return 0;
 		default:
-			abort();
+			return -1;
 		}
 	} else {
 		switch (iccclrspc) {
 		case JAS_ICC_COLORSPC_YCBCR:
-			return JAS_CLRSPC_GENYCBCR;
+			*clrspc = JAS_CLRSPC_GENYCBCR;
+			return 0;
 		case JAS_ICC_COLORSPC_RGB:
-			return JAS_CLRSPC_GENRGB;
+			*clrspc = JAS_CLRSPC_GENRGB;
+			return 0;
 		case JAS_ICC_COLORSPC_GRAY:
-			return JAS_CLRSPC_GENGRAY;
+			*clrspc = JAS_CLRSPC_GENGRAY;
+			return 0;
 		default:
-			abort();
+			return -1;
 		}
 	}
 }
@@ -1284,8 +1304,9 @@ static int triclr(const jas_iccprof_t *iccprof, int op,
 			shapmat->mat[1][i] = (jas_cmreal_t)cols[i]->data.xyz.y / 65536.0;
 			shapmat->mat[2][i] = (jas_cmreal_t)cols[i]->data.xyz.z / 65536.0;
 		}
-		for (unsigned i = 0; i < 3; ++i)
+		for (unsigned i = 0; i < 3; ++i) {
 			shapmat->mat[i][3] = 0.0;
+		}
 		for (unsigned i = 0; i < 3; ++i) {
 			if (jas_cmshapmatlut_set(&shapmat->luts[i], &trcs[i]->data.curv)) {
 				jas_logerrorf("error: jas_cmshapmatlut_set failed\n");
@@ -1299,8 +1320,9 @@ static int triclr(const jas_iccprof_t *iccprof, int op,
 			mat[1][i] = (jas_cmreal_t)cols[i]->data.xyz.y / 65536.0;
 			mat[2][i] = (jas_cmreal_t)cols[i]->data.xyz.z / 65536.0;
 		}
-		for (unsigned i = 0; i < 3; ++i)
+		for (unsigned i = 0; i < 3; ++i) {
 			mat[i][3] = 0.0;
+		}
 		if (jas_cmshapmat_invmat(shapmat->mat, mat)) {
 			jas_logerrorf("error: jas_cmshapmat_invmat failed\n");
 			goto error;

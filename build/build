@@ -1,14 +1,14 @@
 #! /usr/bin/env bash
 
+################################################################################
+# Functions
+################################################################################
+
 panic()
 {
 	echo "ERROR: $@"
 	exit 1
 }
-
-program_dir=$(dirname "$0") || exit 1
-jas_realpath="$program_dir/jas_realpath"
-abs_program_dir=$("$jas_realpath" "$program_dir") || panic
 
 usage()
 {
@@ -78,10 +78,24 @@ usage()
 	exit 2
 }
 
+################################################################################
+# Early initialization.
+################################################################################
+
+program_dir=$(dirname "$0") || exit 1
+jas_realpath="$program_dir/jas_realpath"
+abs_program_dir=$("$jas_realpath" "$program_dir") || panic
+sysinfo_program="$program_dir/sysinfo"
+
+################################################################################
+# Process command line.
+################################################################################
+
 enable=1
 enable_install=0
 build_type=release
 enable_test=0
+enable_conformance_tests=0
 verbose=0
 enable_asan=0
 enable_lsan=0
@@ -96,6 +110,7 @@ use_pthread=0
 enable_multithread=1
 build_dir=
 install_dir=
+out_dir=
 crostini=0
 clean_build_dir=0
 clean_install_dir=0
@@ -105,7 +120,7 @@ use_jas_init=0
 enable_strict=1
 cmake_generator=
 enable_32bit=0
-enable_cxx=0
+enable_cxx=1
 
 while [ $# -gt 0 ]; do
 	option="$1"
@@ -124,22 +139,7 @@ while [ $# -gt 0 ]; do
 		shift 1
 		cmake_generator="Ninja"
 		;;
-	--strict)
-		shift 1
-		enable_strict=1
-		;;
-	--no-strict)
-		shift 1
-		enable_strict=0
-		;;
-	--use-jas-init)
-		shift 1
-		use_jas_init=1
-		;;
-	--no-use-jas-init)
-		shift 1
-		use_jas_init=0
-		;;
+
 	--clean-build-dir)
 		shift 1
 		clean_build_dir=1
@@ -170,105 +170,11 @@ while [ $# -gt 0 ]; do
 		shift 1
 		enable_install=1
 		;;
-	--test)
+	--out-dir)
 		shift 1
-		enable_test=1
-		;;
-	--no-test)
+		[ $# -gt 0 ] || usage
+		out_dir="$1"
 		shift 1
-		enable_test=0
-		;;
-	--documentation)
-		shift 1
-		enable_doc=1
-		;;
-	--no-documentation)
-		shift 1
-		enable_doc=0
-		;;
-	--shared)
-		shift 1
-		enable_shared=1
-		;;
-	--asan)
-		shift 1
-		enable_asan=1
-		;;
-	--no-asan)
-		shift 1
-		enable_asan=0
-		;;
-	--lsan)
-		shift 1
-		enable_lsan=1
-		;;
-	--no-lsan)
-		shift 1
-		enable_lsan=0
-		;;
-	--msan)
-		shift 1
-		enable_msan=1
-		;;
-	--no-msan)
-		shift 1
-		enable_msan=0
-		;;
-	--ubsan)
-		shift 1
-		enable_ubsan=1
-		;;
-	--no-ubsan)
-		shift 1
-		enable_ubsan=0
-		;;
-	--tsan)
-		shift 1
-		enable_tsan=1
-		;;
-	--no-tsan)
-		shift 1
-		enable_tsan=0
-		;;
-	--release)
-		shift 1
-		build_type=release
-		;;
-	--relwithdebinfo)
-		shift 1
-		build_type=relwithdebinfo
-		;;
-	--debug)
-		shift 1
-		build_type=debug
-		;;
-	--prefer-pthread)
-		shift 1
-		use_pthread=1
-		;;
-	--no-prefer-pthread)
-		shift 1
-		use_pthread=0
-		;;
-	--print-only)
-		shift 1
-		enable=0
-		;;
-	--shared)
-		shift 1
-		enable_shared=1
-		;;
-	--static)
-		shift 1
-		enable_shared=0
-		;;
-	--no-multithread)
-		shift 1
-		enable_multithread=0
-		;;
-	--multithread)
-		shift 1
-		enable_multithread=1
 		;;
 	--build-dir)
 		shift 1
@@ -313,6 +219,146 @@ while [ $# -gt 0 ]; do
 		shift 1
 		enable_cxx=0
 		;;
+
+	--strict)
+		shift 1
+		enable_strict=1
+		;;
+	--no-strict)
+		shift 1
+		enable_strict=0
+		;;
+
+	--use-jas-init)
+		shift 1
+		use_jas_init=1
+		;;
+	--no-use-jas-init)
+		shift 1
+		use_jas_init=0
+		;;
+
+	--test)
+		shift 1
+		enable_test=1
+		;;
+	--no-test)
+		shift 1
+		enable_test=0
+		;;
+
+	--conformance-tests)
+		shift 1
+		enable_conformance_tests=1
+		;;
+	--no-conformance-tests)
+		shift 1
+		enable_conformance_tests=0
+		;;
+
+	--documentation)
+		shift 1
+		enable_doc=1
+		;;
+	--no-documentation)
+		shift 1
+		enable_doc=0
+		;;
+
+	--shared)
+		shift 1
+		enable_shared=1
+		;;
+
+	--asan)
+		shift 1
+		enable_asan=1
+		;;
+	--no-asan)
+		shift 1
+		enable_asan=0
+		;;
+
+	--lsan)
+		shift 1
+		enable_lsan=1
+		;;
+	--no-lsan)
+		shift 1
+		enable_lsan=0
+		;;
+
+	--msan)
+		shift 1
+		enable_msan=1
+		;;
+	--no-msan)
+		shift 1
+		enable_msan=0
+		;;
+
+	--ubsan)
+		shift 1
+		enable_ubsan=1
+		;;
+	--no-ubsan)
+		shift 1
+		enable_ubsan=0
+		;;
+
+	--tsan)
+		shift 1
+		enable_tsan=1
+		;;
+	--no-tsan)
+		shift 1
+		enable_tsan=0
+		;;
+
+	--release)
+		shift 1
+		build_type=release
+		;;
+	--relwithdebinfo)
+		shift 1
+		build_type=relwithdebinfo
+		;;
+	--debug)
+		shift 1
+		build_type=debug
+		;;
+
+	--prefer-pthread)
+		shift 1
+		use_pthread=1
+		;;
+	--no-prefer-pthread)
+		shift 1
+		use_pthread=0
+		;;
+
+	--print-only)
+		shift 1
+		enable=0
+		;;
+	--shared)
+		shift 1
+		enable_shared=1
+		;;
+	--static)
+		shift 1
+		enable_shared=0
+		;;
+
+	--no-multithread)
+		shift 1
+		enable_multithread=0
+		;;
+	--multithread)
+		shift 1
+		enable_multithread=1
+		;;
+
 	--help)
 		usage
 		;;
@@ -350,17 +396,44 @@ if [ -z "$os" ]; then
 	fi
 fi
 
+sysinfo_data="$("$sysinfo_program" -a)" || \
+  panic "cannot get system information"
+cat <<- EOF
+================================================================================
+System Information
+$sysinfo_data
+================================================================================
+EOF
+[ $? -eq 0 ] || panic "cat failed"
+
+################################################################################
+# Apply some platform-specific hacks.
+################################################################################
+
 if [ "$crostini" -ne 0 ]; then
 	enable_tsan=0
 fi
+if [ "$os" == windows ]; then
+	if [ "$enable_doc" -ne 0 ]; then
+		echo "WARNING: disabling the generation of documentation"
+		enable_doc=0
+	fi
+fi
+
+################################################################################
+# Perform some initialization.
+################################################################################
 
 source_dir="$abs_program_dir/.."
 
+if [ -z "$out_dir" ]; then
+	out_dir="$source_dir/tmp_cmake"
+fi
 if [ -z "$build_dir" ]; then
-	build_dir="$source_dir/tmp_cmake/build"
+	build_dir="$out_dir/build"
 fi
 if [ -z "$install_dir" ]; then
-	install_dir="$source_dir/tmp_cmake/install"
+	install_dir="$out_dir/install"
 fi
 
 echo "operating system: $os"
@@ -370,12 +443,19 @@ echo "install directory: $install_dir"
 if [ -n "$CC" ]; then
 	echo "C compiler $CC"
 fi
+if [ -n "$CXX" ]; then
+	echo "CXX compiler $CXX"
+fi
 
 if [ -n "$sde_top_dir" ]; then
 	#sde_gcc="$sde_top_dir/bin/gcc"
 	sde_setup="$sde_top_dir/bin/sde_make_setup"
 	eval $("$sde_setup") || panic "setup failed"
 fi
+
+################################################################################
+# Create the build and install directories (possibly emptying them first).
+################################################################################
 
 if [ "$clean_build_dir" -ne 0 -a -e "$build_dir" ]; then
 	echo "Removing $build_dir"
@@ -484,6 +564,12 @@ else
 fi
 if [ "$use_pthread" -ne 0 ]; then
 	configure_opts+=("-DJAS_PREFER_PTHREAD=true")
+fi
+
+if [ "$enable_conformance_tests" -ne 0 ]; then
+	configure_opts+=("-DJAS_ENABLE_CONFORMANCE_TESTS=true")
+else
+	configure_opts+=("-DJAS_ENABLE_CONFORMANCE_TESTS=false")
 fi
 
 configure_opts+=("${program_args[@]}")
