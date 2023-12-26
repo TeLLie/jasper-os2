@@ -89,11 +89,12 @@
 #include <stdatomic.h>
 #elif defined(JAS_THREADS_PTHREAD)
 #include <pthread.h>
-# ifndef __KLIBC__
-#  include <sched.h>
-# else
-#  define sched_yield() pthread_yield()
-# endif
+#  ifdef __OS2__
+#   define INCL_DOS
+#   include <os2.h>
+#  else
+#   include <sched.h>
+#  endif
 #elif defined(JAS_THREADS_WIN32)
 #include <process.h>
 #include <windows.h>
@@ -731,7 +732,11 @@ static inline void jas_thread_yield(void)
 #if defined(JAS_THREADS_C11)
 	thrd_yield();
 #elif defined(JAS_THREADS_PTHREAD)
-	sched_yield();
+#  ifdef __OS2__
+   DosSleep (1);
+#  else
+   sched_yield ();
+#  endif
 #elif defined(JAS_THREADS_WIN32)
 	SwitchToThread();
 #endif
