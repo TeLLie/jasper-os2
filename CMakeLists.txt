@@ -63,7 +63,9 @@ message("CMAKE_C_COMPILER_VERISON: ${CMAKE_C_COMPILER_VERSION}")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/build/cmake/modules)
 
 # This include should be placed as early as possible.
+if(NOT OS2)
 include(InSourceBuild)
+endif(NOT OS2)
 
 include(CheckCCompilerFlag)
 include(EnableAssertions)
@@ -805,9 +807,9 @@ if(JAS_ENABLE_SHARED)
 	# when building, don't use the install RPATH already
 	# (but later on when installing)
 	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-	#set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
+if(NOT OS2)
+	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif(NOT OS2)
 	# add the automatically determined parts of the RPATH
 	# which point to directories outside the build tree to the install RPATH
 	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
