@@ -1,3 +1,42 @@
+4.2.4 (2024-04-27)
+==================
+
+* Added some missing checks to the jas_heic_decode function in the
+  HEIC codec (#383).
+
+4.2.3 (2024-03-30)
+==================
+
+* Added a missing check in the JPC codec (#381) (CVE-2024-31744).
+
+4.2.2 (2024-03-11)
+==================
+
+* Fix minor build issue (#374).
+
+4.2.1 (2024-02-18)
+==================
+
+* Fix a build problem for the DJGPP/MS-DOS environment (#372).
+
+4.2.0 (2024-02-05)
+==================
+
+* Add the JAS_PACKAGING option to the CMake build in an attempt to allow
+  easier control over rpath settings by packagers of JasPer.
+* Remove a number of obsolete scripts.
+* Make some cosmetic changes to the code for the JPC codec in order
+  to improve readability (#371).
+* Fix a portability bug related to threads/atomics.
+* Replace some lingering uses of strtok in the JPC coder with jas_strtok,
+  since the use of strtok is problematic in multithreading contexts.
+
+4.1.2 (2024-01-11)
+==================
+
+* Fix invalid memory write bug (#367) (CVE-2023-51257).
+* Fix missing range check in the JPC encoder (#368).
+
 4.1.1 (2023-11-28)
 ==================
 
