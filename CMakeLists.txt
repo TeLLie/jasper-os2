@@ -318,8 +318,10 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	  JAS_GCC_WARN_NO_STRINGOP_TRUNCATION)
 	check_c_compiler_flag("-Wno-stringop-overflow"
 	  JAS_GCC_WARN_NO_STRINGOP_OVERFLOW)
+if(NOT OS2)
 	check_c_compiler_flag("-Wno-tautological-constant-out-of-range-compare"
 	  JAS_CLANG_WARN_NO_OUT_OF_RANGE_COMPARE)
+endif(NOT OS2)
 	add_c_compile_options(-Wall)
 
 	# Note: Use CMAKE_C_FLAGS (instead of add_compile_options) so that the
@@ -333,9 +335,11 @@ if(CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
 	add_c_compile_options(-Wmissing-prototypes)
 	add_c_compile_options(-Wstrict-prototypes)
 	add_c_compile_options(-Wno-type-limits)
+if(NOT OS2)
 	if (JAS_CLANG_WARN_NO_OUT_OF_RANGE_COMPARE)
 		add_c_compile_options(-Wno-tautological-constant-out-of-range-compare)
 	endif()
+endif(NOT OS2)
 	if(JAS_GCC_WARN_NO_STRINGOP_TRUNCATION)
 		add_c_compile_options(-Wno-stringop-truncation)
 	endif()
