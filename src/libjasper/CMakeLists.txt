@@ -193,6 +193,13 @@ if(UNIX)
 	  VERSION ${JAS_SO_NAME} SOVERSION ${JAS_SO_VERSION})
 endif()
 
+if(OS2)
+set_target_properties(libjasper PROPERTIES
+ OS2_DEF_VENDOR "TeLLie OS2 forever"
+ OS2_DEF_PATCH "${libjasper_VERSION_PATCH}"
+ OS2_DEF_VERSION "${LIBJASPER_VERSION}")
+endif()
+
 if(JAS_ENABLE_SHARED)
 	target_compile_definitions(libjasper PUBLIC JAS_BUILDING_DLL)
 endif()
